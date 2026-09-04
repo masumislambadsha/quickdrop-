@@ -1,0 +1,515 @@
+{
+	"info": {
+		"_postman_id": "quickdrop-collection-2026",
+		"name": "QuickDrop - Courier & Logistics API",
+		"description": "Complete API collection for the QuickDrop Courier & Logistics Platform. Set global variables baseUrl, accessToken, refreshToken, and shipmentId from login/register responses.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000"
+		},
+		{
+			"key": "accessToken",
+			"value": ""
+		},
+		{
+			"key": "refreshToken",
+			"value": ""
+		},
+		{
+			"key": "customerToken",
+			"value": ""
+		},
+		{
+			"key": "courierToken",
+			"value": ""
+		},
+		{
+			"key": "adminToken",
+			"value": ""
+		},
+		{
+			"key": "shipmentId",
+			"value": ""
+		},
+		{
+			"key": "deliveryId",
+			"value": ""
+		},
+		{
+			"key": "courierId",
+			"value": ""
+		},
+		{
+			"key": "trackingNumber",
+			"value": ""
+		},
+		{
+			"key": "paymentId",
+			"value": ""
+		}
+	],
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register Customer",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Demo Customer\",\n    \"email\": \"customer@quickdrop.com\",\n    \"password\": \"Customer@1234\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "register"] }
+					}
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@quickdrop.com\",\n    \"password\": \"Admin@1234\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "login"] },
+						"event": [
+							{
+								"listen": "test",
+								"script": {
+									"type": "text/javascript",
+									"exec": [
+										"var json = pm.response.json();",
+										"if (json.success && json.data) {",
+										"    pm.collectionVariables.set('accessToken', json.data.accessToken);",
+										"    pm.collectionVariables.set('refreshToken', json.data.refreshToken);",
+										"    var role = json.data.user.role;",
+										"    if (role === 'ADMIN') pm.collectionVariables.set('adminToken', json.data.accessToken);",
+										"    if (role === 'CUSTOMER') pm.collectionVariables.set('customerToken', json.data.accessToken);",
+										"    if (role === 'COURIER') pm.collectionVariables.set('courierToken', json.data.accessToken);",
+										"}"
+									]
+								}
+							}
+						]
+					}
+				},
+				{
+					"name": "Login Customer",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"customer@quickdrop.com\",\n    \"password\": \"Customer@1234\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "login"] }
+					}
+				},
+				{
+					"name": "Login Courier",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"courier@quickdrop.com\",\n    \"password\": \"Courier@1234\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "login"] }
+					}
+				},
+				{
+					"name": "Google Login",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"AUTHORIZATION_CODE_FROM_GOOGLE\",\n    \"redirectUri\": \"http://localhost:5000/api/v1/auth/google/callback\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/auth/google/login", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "google", "login"] }
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refreshToken}}\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/auth/refresh-token", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "refresh-token"] }
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/auth/logout", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "logout"] }
+					}
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"oldPassword\": \"OldPass123\",\n    \"newPassword\": \"NewPass123\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/auth/change-password", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "change-password"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get My Profile",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/users/me", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users", "me"] }
+					}
+				},
+				{
+					"name": "Update My Profile",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Name\",\n    \"contactNumber\": \"+8801700000099\",\n    \"address\": \"123 Main St\",\n    \"city\": \"Dhaka\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/users/me", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users", "me"] }
+					}
+				},
+				{
+					"name": "List All Users (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users?page=1&limit=10&role=CUSTOMER",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "users"],
+							"query": [
+								{ "key": "page", "value": "1", "description": "Page number" },
+								{ "key": "limit", "value": "10", "description": "Items per page" },
+								{ "key": "role", "value": "CUSTOMER", "description": "CUSTOMER, COURIER, or ADMIN" },
+								{ "key": "search", "value": "", "description": "Search by name or email" }
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Shipments",
+			"item": [
+				{
+					"name": "Create Shipment",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"senderName\": \"Demo Customer\",\n    \"senderPhone\": \"+8801700000001\",\n    \"recipientName\": \"Amina Begum\",\n    \"recipientPhone\": \"+8801800000001\",\n    \"origin\": \"Dhaka\",\n    \"destination\": \"Chattogram\",\n    \"distanceKm\": 250,\n    \"weightKg\": 3.5,\n    \"packageType\": \"PARCEL\",\n    \"declaredValue\": 5000,\n    \"pricingTier\": \"STANDARD\",\n    \"notes\": \"Handle with care\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/shipments", "host": ["{{baseUrl}}"], "path": ["api", "v1", "shipments"] },
+						"event": [
+							{
+								"listen": "test",
+								"script": {
+									"type": "text/javascript",
+									"exec": [
+										"var json = pm.response.json();",
+										"if (json.success && json.data) {",
+										"    pm.collectionVariables.set('shipmentId', json.data.id);",
+										"    pm.collectionVariables.set('trackingNumber', json.data.trackingNumber);",
+										"}"
+									]
+								}
+							}
+						]
+					}
+				},
+				{
+					"name": "List All Shipments",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/shipments?page=1&limit=10&status=REQUESTED",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "shipments"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" },
+								{ "key": "status", "value": "REQUESTED", "description": "REQUESTED, PICKED_UP, IN_TRANSIT, OUT_FOR_DELIVERY, DELIVERED, FAILED, CANCELLED" }
+							]
+						}
+					}
+				},
+				{
+					"name": "My Shipments",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/shipments/my", "host": ["{{baseUrl}}"], "path": ["api", "v1", "shipments", "my"] }
+					}
+				},
+				{
+					"name": "Search Shipments",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/shipments/search?search=QD", "host": ["{{baseUrl}}"], "path": ["api", "v1", "shipments", "search"], "query": [{ "key": "search", "value": "QD" }] }
+					}
+				},
+				{
+					"name": "Track Shipment (Public)",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/api/v1/shipments/track/{{trackingNumber}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "shipments", "track", "{{trackingNumber}}"] }
+					}
+				},
+				{
+					"name": "Get Shipment By Id",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "shipments", "{{shipmentId}}"] }
+					}
+				},
+				{
+					"name": "Update Shipment (Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"recipientName\": \"Updated Recipient\",\n    \"weightKg\": 4.2\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "shipments", "{{shipmentId}}"] }
+					}
+				},
+				{
+					"name": "Soft-Delete Shipment (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "shipments", "{{shipmentId}}"] }
+					}
+				},
+				{
+					"name": "Cancel Shipment (Customer)",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}/cancel", "host": ["{{baseUrl}}"], "path": ["api", "v1", "shipments", "{{shipmentId}}", "cancel"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Deliveries",
+			"item": [
+				{
+					"name": "Assign Courier (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"courierId\": \"{{courierId}}\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/deliveries/{{shipmentId}}/assign-courier", "host": ["{{baseUrl}}"], "path": ["api", "v1", "deliveries", "{{shipmentId}}", "assign-courier"] },
+						"event": [
+							{
+								"listen": "test",
+								"script": {
+									"type": "text/javascript",
+									"exec": [
+										"var json = pm.response.json();",
+										"if (json.success && json.data) pm.collectionVariables.set('deliveryId', json.data.id);"
+									]
+								}
+							}
+						]
+					}
+				},
+				{
+					"name": "My Deliveries (Courier)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{courierToken}}" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/deliveries?limit=10", "host": ["{{baseUrl}}"], "path": ["api", "v1", "deliveries"], "query": [{ "key": "limit", "value": "10" }] }
+					}
+				},
+				{
+					"name": "Assigned Deliveries (Courier)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{courierToken}}" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/deliveries/assigned", "host": ["{{baseUrl}}"], "path": ["api", "v1", "deliveries", "assigned"] }
+					}
+				},
+				{
+					"name": "Update Delivery Status",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{courierToken}}" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"PICKED_UP\",\n    \"failedReason\": \"\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/deliveries/{{deliveryId}}/status", "host": ["{{baseUrl}}"], "path": ["api", "v1", "deliveries", "{{deliveryId}}", "status"] }
+					}
+				},
+				{
+					"name": "Confirm Delivery",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{courierToken}}" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"2269\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/deliveries/{{deliveryId}}/confirm", "host": ["{{baseUrl}}"], "path": ["api", "v1", "deliveries", "{{deliveryId}}", "confirm"] }
+					}
+				},
+				{
+					"name": "Get Delivery By Id",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/deliveries/{{deliveryId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "deliveries", "{{deliveryId}}"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Payments",
+			"item": [
+				{
+					"name": "Initiate Payment",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shipmentId\": \"{{shipmentId}}\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/payments", "host": ["{{baseUrl}}"], "path": ["api", "v1", "payments"] },
+						"event": [
+							{
+								"listen": "test",
+								"script": {
+									"type": "text/javascript",
+									"exec": [
+										"var json = pm.response.json();",
+										"if (json.success && json.data) pm.collectionVariables.set('paymentId', json.data.paymentId);"
+									]
+								}
+							}
+						]
+					}
+				},
+				{
+					"name": "Get Payment Status",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/payments/{{paymentId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "payments", "{{paymentId}}"] }
+					}
+				},
+				{
+					"name": "List All Payments (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/payments?limit=10", "host": ["{{baseUrl}}"], "path": ["api", "v1", "payments"], "query": [{ "key": "limit", "value": "10" }] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Dashboard Stats",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/admin/dashboard-stats", "host": ["{{baseUrl}}"], "path": ["api", "v1", "admin", "dashboard-stats"] }
+					}
+				},
+				{
+					"name": "Audit Logs",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/admin/audit-logs?limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "admin", "audit-logs"],
+							"query": [
+								{ "key": "limit", "value": "10" },
+								{ "key": "actorId", "value": "" },
+								{ "key": "action", "value": "" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Change User Role (Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"role\": \"COURIER\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/admin/users/USER_ID/role", "host": ["{{baseUrl}}"], "path": ["api", "v1", "admin", "users", "USER_ID", "role"] }
+					}
+				},
+				{
+					"name": "Change User Status (Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"BLOCKED\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/admin/users/USER_ID/status", "host": ["{{baseUrl}}"], "path": ["api", "v1", "admin", "users", "USER_ID", "status"] }
+					}
+				}
+			]
+		}
+	]
+}
