@@ -27,6 +27,9 @@ import config from "./app/config/index.js";
 
 const app = express();
 
+// Trust the reverse proxy (Vercel) so rate-limiting can use X-Forwarded-For.
+app.set("trust proxy", 1);
+
 app.use(helmet());
 app.use(
 	cors({
