@@ -50,45 +50,79 @@ console.log("   " + authUrl + "\n");
 const rl = readline.createInterface({ input, output });
 
 rl.question(
-	"👉  After signing in, your browser lands on your API URL.\n" +
-	"    Copy the FULL URL from the address bar (it contains ?code=...) and paste it here:\n\n",
-	async (redirectedUrl) => {
+	"👉  Two ways to continue:\n" +
+	"   [1] Paste the FULL redirect URL from the address bar (contains ?code=...)\n" +
+	"   [2] Paste a Google ID TOKEN directly (JWT starting with 'eyJ...')\n\n" +
+	"    Enter here: ",
+	async (answer) => {
 		rl.close();
+		const trimmed = answer.trim();
+
+		// Path 2: user pasted a raw id_token
+		if (trimmed.startsWith("eyJ")) {
+			console.log("\n✅ Got an ID token. Sending to QuickDrop backend...");
+			const resp = await fetch(`${BACKEND}/api/v1/auth/google/login`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ idToken: trimmed }),
+			});
+			await printLoginResult(resp);
+			return;
+		}
+
+		// Path 1: user pasted the redirect URL containing ?code=
 		try {
-			const target = new URL(redirectedUrl.trim());
+			const target = new URL(trimmed);
 			const code = target.searchParams.get("code");
 			const err = target.searchParams.get("error");
 
 			if (!code) {
 				console.error("\n❌ No code found in that URL.");
 				console.error("   Google error param:", err ?? "(none)");
-				if (err === "redirect_uri_mismatch") {
+				if (err === "redirect_uri_mismatch" || err?.includes("redirect_uri_mismatch") || decodedError(trimmed).includes("redirect_uri_mismatch")) {
 					console.error("\n🔧 FIX: Add this exact URI to GCP OAuth Client > 'Authorized redirect URIs':");
 					console.error("   " + REDIRECT);
+					console.error("   (Google Cloud Console > APIs & Services > Credentials > OAuth 2.0 Client IDs > your client > Authorized redirect URIs)\n");
 				}
 				process.exit(1);
 			}
 
 			console.log("\n✅ Got auth code. Exchanging with QuickDrop backend...");
-
 			const resp = await fetch(`${BACKEND}/api/v1/auth/google/login`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ code, redirectUri: REDIRECT }),
 			});
-			const data = await resp.json();
-
-			if (data.success) {
-				console.log("\n🎉 SUCCESS! Logged in as:", data.data.user.email, "(" + data.data.user.role + ")");
-				console.log("\n   Copy this full accessToken into Postman's {{accessToken}} variable:\n");
-				console.log("   " + data.data.accessToken);
-				console.log("\n   For the customer-token variable, your role is: " + data.data.user.role);
-			} else {
-				console.log("\n❌ Backend rejected login:", JSON.stringify(data, null, 2));
-			}
+			await printLoginResult(resp);
 		} catch (e) {
 			console.error("\n❌ Could not parse that URL:", e.message);
 		}
-		process.exit(0);
 	},
 );
+
+function decodedError(input) {
+	try {
+		const url = new URL(input);
+		const err = url.searchParams.get("authError");
+		if (err) return Buffer.from(err, "base64").toString("utf8");
+	} catch {
+		/* ignore */
+	}
+	return "";
+}
+
+async function printLoginResult(resp) {
+	const data = await resp.json();
+	if (data.success) {
+		console.log("\n🎉 SUCCESS! Logged in as:", data.data.user.email, "(" + data.data.user.role + ")");
+		console.log("\n   Copy this full accessToken into Postman's {{accessToken}} variable:\n");
+		console.log("   " + data.data.accessToken);
+		console.log("\n   For the customer-token variable, your role is: " + data.data.user.role);
+	} else {
+		console.log("\n❌ Backend rejected login:", JSON.stringify(data, null, 2));
+		if (/redirect_uri_mismatch|client_id/i.test(JSON.stringify(data, null, 2))) {
+			console.error("\n🔧 If it's a redirect_uri_mismatch, add this to GCP OAuth Authorized redirect URIs:\n   " + REDIRECT);
+		}
+	}
+	process.exit(0);
+}
