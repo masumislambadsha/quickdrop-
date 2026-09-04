@@ -8,7 +8,7 @@
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "http://localhost:5000"
+			"value": "https://courier-and-logistics.vercel.app"
 		},
 		{
 			"key": "accessToken",
@@ -133,7 +133,7 @@
 						"header": [{ "key": "Content-Type", "value": "application/json" }],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"code\": \"AUTHORIZATION_CODE_FROM_GOOGLE\",\n    \"redirectUri\": \"http://localhost:5000/api/v1/auth/google/callback\"\n}",
+							"raw": "{\n    \"code\": \"AUTHORIZATION_CODE_FROM_GOOGLE\",\n    \"redirectUri\": \"https://courier-and-logistics.vercel.app/api/v1/auth/google/callback\"\n}",
 							"options": { "raw": { "language": "json" } }
 						},
 						"description": "Requires http://localhost:5000/api/v1/auth/google/callback to be added to the GCP OAuth client's Authorized redirect URIs (otherwise Google returns redirect_uri_mismatch).",
