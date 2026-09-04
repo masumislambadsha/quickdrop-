@@ -24,8 +24,8 @@ Built for the **B7A6** assignment.
 Project Name    : QuickDrop — Courier & Logistics Platform
 Backend Repo    : https://github.com/masumislambadsha/quickdrop-
 Live API        : https://courier-and-logistics.vercel.app
-API Docs        : <postman-url>
-Demo Video      : <video-url>
+API Docs        : https://documenter.getpostman.com/view/55365742/2sBYAvvqVg
+Demo Video      : https://drive.google.com/file/d/1FqqVwRL2BJ_REnMmN-CTDswfPfv-a9YF/view
 Admin Email     : admin@quickdrop.com
 Admin Password  : Admin@1234
 ```
