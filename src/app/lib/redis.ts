@@ -9,13 +9,17 @@ function getClient(): RedisClientType | null {
 	if (!config.redis.url) {
 		return null;
 	}
-	if (!client) {
-		client = createClient({ url: config.redis.url });
-		client.on("error", () => {
-			connected = false;
-		});
+	try {
+		if (!client) {
+			client = createClient({ url: config.redis.url });
+			client.on("error", () => {
+				connected = false;
+			});
+		}
+		return client;
+	} catch {
+		return null;
 	}
-	return client;
 }
 
 async function ensureConnected(): Promise<RedisClientType | null> {
