@@ -42,7 +42,7 @@ const googleCallback = catchAsync(async (req, res) => {
 
 	const result = await AuthService.googleLogin({
 		code,
-		redirectUri: req.body.redirectUri ?? process.env.GOOGLE_REDIRECT_URI ?? "",
+		redirectUri: (req.body?.redirectUri as string | undefined) ?? process.env.GOOGLE_REDIRECT_URI ?? "",
 	});
 
 	setAuthCookies(res, result.accessToken, result.refreshToken);
