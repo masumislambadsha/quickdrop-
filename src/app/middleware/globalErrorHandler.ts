@@ -47,10 +47,5 @@ export function globalErrorHandler(error: unknown, _req: Request, res: Response,
 		console.error("[ERROR]", error);
 	}
 
-	// Temporary: log production error stack for debugging.
-	if (config.app.env === "production") {
-		console.error("[ERROR_PROD]", error instanceof Error ? { message: error.message, stack: error.stack } : error);
-	}
-
 	sendErrorResponse(res, statusCode, message, errors);
 }
