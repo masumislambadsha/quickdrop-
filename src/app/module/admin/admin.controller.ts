@@ -1,13 +1,13 @@
 import type { Request, Response } from "express";
 import httpStatus from "http-status";
 
-import type { AuthRequest } from "../../middleware/checkAuth";
+import type { AuthRequest } from "../../middleware/checkAuth.js";
 
-import { catchAsync } from "../../utils/catchAsync";
+import { catchAsync } from "../../utils/catchAsync.js";
 
-import { sendResponse } from "../../utils/sendResponse";
+import { sendResponse } from "../../utils/sendResponse.js";
 
-import { AdminService } from "./admin.service";
+import { AdminService } from "./admin.service.js";
 
 const getDashboardStats = catchAsync(async (_req: Request, res: Response) => {
 	const result = await AdminService.getDashboardStats();

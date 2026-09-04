@@ -1,16 +1,16 @@
 import httpStatus from "http-status";
 import Stripe from "stripe";
-import type { Prisma } from "../../../generated/prisma/client";
+import type { Prisma } from "../../../generated/prisma/client.js";
 
-import config from "../../config";
+import config from "../../config/index.js";
 
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../lib/prisma.js";
 
-import { AppError } from "../../utils/AppError";
+import { AppError } from "../../utils/AppError.js";
 
-import { calculatePagination, parsePageParams } from "../../utils/pagination";
+import { calculatePagination, parsePageParams } from "../../utils/pagination.js";
 
-import type { IPaymentQuery } from "./payment.interface";
+import type { IPaymentQuery } from "./payment.interface.js";
 
 function getStripe(): Stripe | null {
 	if (!config.stripe.secretKey) {

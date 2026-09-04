@@ -1,4 +1,4 @@
-import type { PackageType, PricingTier } from "../../generated/prisma/enums";
+import type { PackageType, PricingTier } from "../../generated/prisma/enums.js";
 
 function generateTrackingNumber(): string {
 	const timestamp = Date.now().toString(36).toUpperCase();

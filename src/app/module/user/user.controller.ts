@@ -1,12 +1,12 @@
 import httpStatus from "http-status";
 
-import { catchAsync } from "../../utils/catchAsync";
+import { catchAsync } from "../../utils/catchAsync.js";
 
-import { sendResponse } from "../../utils/sendResponse";
+import { sendResponse } from "../../utils/sendResponse.js";
 
-import type { AuthRequest } from "../../middleware/checkAuth";
+import type { AuthRequest } from "../../middleware/checkAuth.js";
 
-import { UserService } from "./user.service";
+import { UserService } from "./user.service.js";
 
 const getMe = catchAsync(async (req: AuthRequest, res) => {
 	const result = await UserService.getUserProfile(req.user!.id);

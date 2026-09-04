@@ -1,8 +1,8 @@
 import jwt, { type JwtPayload, type SignOptions } from "jsonwebtoken";
 
-import config from "../config";
+import config from "../config/index.js";
 
-import { AppError } from "./AppError";
+import { AppError } from "./AppError.js";
 
 type TokenType = "access" | "refresh";
 

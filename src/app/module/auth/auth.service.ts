@@ -1,13 +1,13 @@
 import bcrypt from "bcryptjs";
 import httpStatus from "http-status";
 
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../lib/prisma.js";
 
-import { AppError } from "../../utils/AppError";
+import { AppError } from "../../utils/AppError.js";
 
-import { signToken, verifyToken } from "../../utils/jwt";
+import { signToken, verifyToken } from "../../utils/jwt.js";
 
-import config from "../../config";
+import config from "../../config/index.js";
 
 import type {
 	IAuthResponse,
@@ -16,7 +16,7 @@ import type {
 	IGoogleLoginRequest,
 	ILoginRequest,
 	IRegisterRequest,
-} from "./auth.interface";
+} from "./auth.interface.js";
 
 async function issueTokens(user: {
 	id: string;

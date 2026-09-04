@@ -1,24 +1,24 @@
 import crypto from "node:crypto";
 import httpStatus from "http-status";
-import { Prisma } from "../../../generated/prisma/client";
+import { Prisma } from "../../../generated/prisma/client.js";
 
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../lib/prisma.js";
 
-import { AppError } from "../../utils/AppError";
+import { AppError } from "../../utils/AppError.js";
 
 import {
 	calculatePagination,
 	parsePageParams,
-} from "../../utils/pagination";
+} from "../../utils/pagination.js";
 
-import { getNextDeliveryStatuses, getNextStatuses } from "../../utils/shipmentUtils";
+import { getNextDeliveryStatuses, getNextStatuses } from "../../utils/shipmentUtils.js";
 
 import type {
 	IAssignCourierRequest,
 	IMyDeliveriesQuery,
 	IUpdateDeliveryStatusParams,
 	IUpdateDeliveryStatusRequest,
-} from "./delivery.interface";
+} from "./delivery.interface.js";
 
 const DELIVERED_TO_SHIPMENT: Record<string, string> = {
 	ASSIGNED: "PICKED_UP",

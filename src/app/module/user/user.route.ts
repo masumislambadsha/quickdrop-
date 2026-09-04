@@ -1,12 +1,12 @@
 import { Router } from "express";
 
-import { checkAuth, requireRole } from "../../middleware/checkAuth";
+import { checkAuth, requireRole } from "../../middleware/checkAuth.js";
 
-import { validate } from "../../middleware/validate";
+import { validate } from "../../middleware/validate.js";
 
-import { getUsersQuerySchema, updateMeSchema } from "./user.validation";
+import { getUsersQuerySchema, updateMeSchema } from "./user.validation.js";
 
-import { UserController } from "./user.controller";
+import { UserController } from "./user.controller.js";
 
 const router = Router();
 

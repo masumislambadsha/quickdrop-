@@ -1,12 +1,12 @@
 import httpStatus from "http-status";
 
-import { catchAsync } from "../../utils/catchAsync";
+import { catchAsync } from "../../utils/catchAsync.js";
 
-import { sendResponse } from "../../utils/sendResponse";
+import { sendResponse } from "../../utils/sendResponse.js";
 
-import { setAuthCookies } from "../../utils/cookies";
+import { setAuthCookies } from "../../utils/cookies.js";
 
-import { AuthService } from "./auth.service";
+import { AuthService } from "./auth.service.js";
 
 const googleLogin = catchAsync(async (req, res) => {
 	const result = await AuthService.googleLogin({

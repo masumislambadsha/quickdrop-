@@ -1,28 +1,28 @@
 import httpStatus from "http-status";
-import type { Prisma } from "../../../generated/prisma/client";
+import type { Prisma } from "../../../generated/prisma/client.js";
 
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../lib/prisma.js";
 
-import { AppError } from "../../utils/AppError";
+import { AppError } from "../../utils/AppError.js";
 
 import {
 	buildWhere,
 	calculatePagination,
 	parsePageParams,
-} from "../../utils/pagination";
+} from "../../utils/pagination.js";
 
 import {
 	calculateShippingCost,
 	generateTrackingNumber,
 	getNextStatuses,
-} from "../../utils/shipmentUtils";
+} from "../../utils/shipmentUtils.js";
 
 import type {
 	ICreateShipmentRequest,
 	IListShipmentsQuery,
 	IMyShipmentsQuery,
 	IUpdateShipmentRequest,
-} from "./shipment.interface";
+} from "./shipment.interface.js";
 
 async function getCustomerId(userId: string): Promise<string> {
 	const customer = await prisma.customer.findUnique({

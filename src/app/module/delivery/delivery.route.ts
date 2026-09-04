@@ -1,17 +1,17 @@
 import { Router } from "express";
 
-import { checkAuth, requireRole } from "../../middleware/checkAuth";
+import { checkAuth, requireRole } from "../../middleware/checkAuth.js";
 
-import { validate } from "../../middleware/validate";
+import { validate } from "../../middleware/validate.js";
 
 import {
 	assignCourierSchema,
 	confirmDeliverySchema,
 	getMyDeliveriesQuerySchema,
 	updateDeliveryStatusSchema,
-} from "./delivery.validation";
+} from "./delivery.validation.js";
 
-import { DeliveryController } from "./delivery.controller";
+import { DeliveryController } from "./delivery.controller.js";
 
 const router = Router();
 

@@ -1,12 +1,12 @@
 import { Router } from "express";
 
-import { checkAuth, requireRole } from "../../middleware/checkAuth";
+import { checkAuth, requireRole } from "../../middleware/checkAuth.js";
 
-import { validate } from "../../middleware/validate";
+import { validate } from "../../middleware/validate.js";
 
-import { getPaymentStatusSchema, initiatePaymentSchema, listPaymentsQuerySchema } from "./payment.validation";
+import { getPaymentStatusSchema, initiatePaymentSchema, listPaymentsQuerySchema } from "./payment.validation.js";
 
-import { PaymentController } from "./payment.controller";
+import { PaymentController } from "./payment.controller.js";
 
 const router = Router();
 

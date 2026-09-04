@@ -1,12 +1,12 @@
 import type { NextFunction, Request, Response } from "express";
 
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 
-import { AppError } from "../utils/AppError";
+import { AppError } from "../utils/AppError.js";
 
-import { getAccessTokenFromRequest } from "../utils/cookies";
+import { getAccessTokenFromRequest } from "../utils/cookies.js";
 
-import { verifyToken } from "../utils/jwt";
+import { verifyToken } from "../utils/jwt.js";
 
 export interface AuthUser {
 	id: string;

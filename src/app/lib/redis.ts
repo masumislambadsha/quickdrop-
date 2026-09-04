@@ -1,6 +1,6 @@
 import { createClient, type RedisClientType } from "redis";
 
-import config from "../config";
+import config from "../config/index.js";
 
 let client: RedisClientType | null = null;
 let connected = false;

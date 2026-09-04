@@ -3,27 +3,27 @@ import cors from "cors";
 import express, { type Request } from "express";
 import helmet from "helmet";
 
-import { apiRateLimiter } from "./app/middleware/rateLimiter";
+import { apiRateLimiter } from "./app/middleware/rateLimiter.js";
 
-import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
+import { globalErrorHandler } from "./app/middleware/globalErrorHandler.js";
 
-import { notFound } from "./app/middleware/notFound";
+import { notFound } from "./app/middleware/notFound.js";
 
-import { adminRoutes } from "./app/module/admin/admin.route";
+import { adminRoutes } from "./app/module/admin/admin.route.js";
 
-import { authRoutes } from "./app/module/auth/auth.route";
+import { authRoutes } from "./app/module/auth/auth.route.js";
 
-import { deliveryRoutes } from "./app/module/delivery/delivery.route";
+import { deliveryRoutes } from "./app/module/delivery/delivery.route.js";
 
-import { handleStripeWebhook } from "./app/module/payment/payment.webhook";
+import { handleStripeWebhook } from "./app/module/payment/payment.webhook.js";
 
-import { paymentRoutes } from "./app/module/payment/payment.route";
+import { paymentRoutes } from "./app/module/payment/payment.route.js";
 
-import { shipmentRoutes } from "./app/module/shipment/shipment.route";
+import { shipmentRoutes } from "./app/module/shipment/shipment.route.js";
 
-import { userRoutes } from "./app/module/user/user.route";
+import { userRoutes } from "./app/module/user/user.route.js";
 
-import config from "./app/config";
+import config from "./app/config/index.js";
 
 const app = express();
 

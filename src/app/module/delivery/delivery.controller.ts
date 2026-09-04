@@ -1,13 +1,13 @@
 import type { Request, Response } from "express";
 import httpStatus from "http-status";
 
-import type { AuthRequest } from "../../middleware/checkAuth";
+import type { AuthRequest } from "../../middleware/checkAuth.js";
 
-import { catchAsync } from "../../utils/catchAsync";
+import { catchAsync } from "../../utils/catchAsync.js";
 
-import { sendResponse } from "../../utils/sendResponse";
+import { sendResponse } from "../../utils/sendResponse.js";
 
-import { DeliveryService } from "./delivery.service";
+import { DeliveryService } from "./delivery.service.js";
 
 const assignCourier = catchAsync(async (req: AuthRequest, res: Response) => {
 	const result = await DeliveryService.assignCourier(

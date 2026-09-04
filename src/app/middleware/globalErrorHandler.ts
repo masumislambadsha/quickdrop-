@@ -2,11 +2,11 @@ import type { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 import { ZodError } from "zod";
 
-import { Prisma } from "../../generated/prisma/client";
+import { Prisma } from "../../generated/prisma/client.js";
 
-import config from "../config";
+import config from "../config/index.js";
 
-import { sendErrorResponse } from "../utils/sendResponse";
+import { sendErrorResponse } from "../utils/sendResponse.js";
 
 export function globalErrorHandler(error: unknown, _req: Request, res: Response, _next: NextFunction): void {
 	let statusCode: number = config.errorCode;

@@ -1,4 +1,4 @@
-import type { PackageType, PricingTier } from "../../../generated/prisma/enums";
+import type { PackageType, PricingTier } from "../../../generated/prisma/enums.js";
 
 export interface ICreateShipmentRequest {
 	senderName: string;

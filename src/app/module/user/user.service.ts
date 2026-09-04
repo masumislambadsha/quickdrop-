@@ -1,13 +1,13 @@
 import httpStatus from "http-status";
-import type { Prisma } from "../../../generated/prisma/client";
+import type { Prisma } from "../../../generated/prisma/client.js";
 
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../lib/prisma.js";
 
-import { AppError } from "../../utils/AppError";
+import { AppError } from "../../utils/AppError.js";
 
-import { calculatePagination, parsePageParams } from "../../utils/pagination";
+import { calculatePagination, parsePageParams } from "../../utils/pagination.js";
 
-import type { IGetUsersFaqQuery, IUpdateMeRequest } from "./user.interface";
+import type { IGetUsersFaqQuery, IUpdateMeRequest } from "./user.interface.js";
 
 async function getUserProfile(userId: string) {
 	const user = await prisma.user.findUnique({

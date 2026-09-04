@@ -1,13 +1,13 @@
 import type { Request, Response } from "express";
 import httpStatus from "http-status";
 
-import type { AuthRequest } from "../../middleware/checkAuth";
+import type { AuthRequest } from "../../middleware/checkAuth.js";
 
-import { catchAsync } from "../../utils/catchAsync";
+import { catchAsync } from "../../utils/catchAsync.js";
 
-import { sendResponse } from "../../utils/sendResponse";
+import { sendResponse } from "../../utils/sendResponse.js";
 
-import { PaymentService } from "./payment.service";
+import { PaymentService } from "./payment.service.js";
 
 const initiatePayment = catchAsync(async (req: AuthRequest, res: Response) => {
 	const result = await PaymentService.initiatePayment(req.user!.id, req.body.shipmentId);

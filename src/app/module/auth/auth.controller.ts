@@ -1,14 +1,14 @@
 import httpStatus from "http-status";
 
-import { catchAsync } from "../../utils/catchAsync";
+import { catchAsync } from "../../utils/catchAsync.js";
 
-import { sendResponse } from "../../utils/sendResponse";
+import { sendResponse } from "../../utils/sendResponse.js";
 
-import { clearAuthCookies, getRefreshTokenFromRequest, setAuthCookies } from "../../utils/cookies";
+import { clearAuthCookies, getRefreshTokenFromRequest, setAuthCookies } from "../../utils/cookies.js";
 
-import type { AuthRequest } from "../../middleware/checkAuth";
+import type { AuthRequest } from "../../middleware/checkAuth.js";
 
-import { AuthService } from "./auth.service";
+import { AuthService } from "./auth.service.js";
 
 const registerUser = catchAsync(async (req, res) => {
 	const result = await AuthService.registerUser(req.body);

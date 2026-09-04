@@ -1,4 +1,4 @@
-import { Prisma } from "../../generated/prisma/client";
+import { Prisma } from "../../generated/prisma/client.js";
 
 function buildWhere(options: {
 	search?: string;

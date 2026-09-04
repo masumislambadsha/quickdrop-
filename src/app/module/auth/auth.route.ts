@@ -1,10 +1,10 @@
 import { Router } from "express";
 
-import { authRateLimiter } from "../../middleware/rateLimiter";
+import { authRateLimiter } from "../../middleware/rateLimiter.js";
 
-import { checkAuth } from "../../middleware/checkAuth";
+import { checkAuth } from "../../middleware/checkAuth.js";
 
-import { validate } from "../../middleware/validate";
+import { validate } from "../../middleware/validate.js";
 
 import {
 	changePasswordSchema,
@@ -12,11 +12,11 @@ import {
 	loginSchema,
 	refreshTokenSchema,
 	registerSchema,
-} from "./auth.validation";
+} from "./auth.validation.js";
 
-import { AuthController } from "./auth.controller";
+import { AuthController } from "./auth.controller.js";
 
-import { GoogleAuthController } from "./auth.google.controller";
+import { GoogleAuthController } from "./auth.google.controller.js";
 
 const router = Router();
 

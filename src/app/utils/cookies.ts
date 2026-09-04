@@ -1,6 +1,6 @@
 import type { Response } from "express";
 
-import { AppError } from "../utils/AppError";
+import { AppError } from "../utils/AppError.js";
 
 export const ACCESS_TOKEN_COOKIE = "accessToken";
 export const REFRESH_TOKEN_COOKIE = "refreshToken";

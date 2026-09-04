@@ -1,15 +1,15 @@
 import httpStatus from "http-status";
-import type { Prisma } from "../../../generated/prisma/client";
+import type { Prisma } from "../../../generated/prisma/client.js";
 
-import { redis } from "../../lib/redis";
+import { redis } from "../../lib/redis.js";
 
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../lib/prisma.js";
 
-import { AppError } from "../../utils/AppError";
+import { AppError } from "../../utils/AppError.js";
 
-import { calculatePagination, parsePageParams } from "../../utils/pagination";
+import { calculatePagination, parsePageParams } from "../../utils/pagination.js";
 
-import type { IAuditLogsQuery } from "./admin.interface";
+import type { IAuditLogsQuery } from "./admin.interface.js";
 
 const STATS_CACHE_KEY = "admin:dashboard:stats";
 const STATS_CACHE_TTL = 60;

@@ -2,11 +2,11 @@ import type { Request, Response } from "express";
 import httpStatus from "http-status";
 import Stripe from "stripe";
 
-import config from "../../config";
+import config from "../../config/index.js";
 
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../lib/prisma.js";
 
-import { sendErrorResponse } from "../../utils/sendResponse";
+import { sendErrorResponse } from "../../utils/sendResponse.js";
 
 export async function handleStripeWebhook(req: Request, res: Response): Promise<void> {
 	try {
