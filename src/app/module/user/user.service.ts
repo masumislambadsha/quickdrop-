@@ -65,7 +65,7 @@ async function updateUserProfile(userId: string, payload: IUpdateMeRequest) {
 			throw new AppError(httpStatus.NOT_FOUND, "Customer profile not found.");
 		}
 
-		const updated = await prisma.$transaction([
+		await prisma.$transaction([
 			prisma.user.update({
 				where: { id: userId },
 				data: { name: payload.name },
@@ -81,7 +81,7 @@ async function updateUserProfile(userId: string, payload: IUpdateMeRequest) {
 			}),
 		]);
 
-		return updated;
+		return getUserProfile(userId);
 	}
 
 	if (user.role === "COURIER") {
@@ -90,7 +90,7 @@ async function updateUserProfile(userId: string, payload: IUpdateMeRequest) {
 			throw new AppError(httpStatus.NOT_FOUND, "Courier profile not found.");
 		}
 
-		const updated = await prisma.$transaction([
+		await prisma.$transaction([
 			prisma.user.update({
 				where: { id: userId },
 				data: { name: payload.name },
@@ -105,7 +105,7 @@ async function updateUserProfile(userId: string, payload: IUpdateMeRequest) {
 			}),
 		]);
 
-		return updated;
+		return getUserProfile(userId);
 	}
 
 	throw new AppError(httpStatus.BAD_REQUEST, "Profile updates are not available for admin accounts.");
