@@ -1,0 +1,20 @@
+model Payment {
+	id                    String        @id @default(uuid(7))
+	shipmentId            String
+	amount                Float
+	currency              String        @default("usd")
+	stripeSessionId       String?       @unique
+	stripeSessionUrl      String?
+	stripePaymentIntentId String?       @unique
+	status                PaymentStatus @default(UNPAID)
+	receiptUrl            String?
+	paidAt                DateTime?
+	createdAt             DateTime      @default(now())
+	updatedAt             DateTime      @updatedAt
+
+	shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Restrict)
+
+	@@index([shipmentId])
+	@@index([status])
+	@@map("payments")
+}

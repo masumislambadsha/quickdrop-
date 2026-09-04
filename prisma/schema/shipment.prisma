@@ -1,0 +1,74 @@
+model Shipment {
+	id             String         @id @default(uuid(7))
+	trackingNumber String         @unique
+	customerId     String
+	senderName     String
+	senderPhone    String
+	recipientName  String
+	recipientPhone String
+	origin         String
+	destination    String
+	distanceKm     Float
+	weightKg       Float
+	packageType    PackageType
+	declaredValue  Float          @default(0)
+	pricingTier    PricingTier    @default(STANDARD)
+	cost           Float
+	notes          String?
+	status         ShipmentStatus @default(REQUESTED)
+	paymentStatus  PaymentStatus  @default(UNPAID)
+	isDeleted      Boolean        @default(false)
+	deletedAt      DateTime?
+	createdAt      DateTime       @default(now())
+	updatedAt      DateTime       @updatedAt
+
+	customer       Customer        @relation(fields: [customerId], references: [id], onDelete: Restrict)
+	delivery       Delivery?
+	payments       Payment[]
+	trackingEvents TrackingEvent[]
+
+	@@index([customerId])
+	@@index([status])
+	@@index([paymentStatus])
+	@@index([origin])
+	@@index([destination])
+	@@index([createdAt])
+	@@index([isDeleted])
+	@@map("shipments")
+}
+
+model Delivery {
+	id           String         @id @default(uuid(7))
+	shipmentId   String         @unique
+	courierId    String
+	status       DeliveryStatus @default(ASSIGNED)
+	assignedAt   DateTime       @default(now())
+	pickupAt     DateTime?
+	deliveredAt  DateTime?
+	failedReason String?
+	createdAt    DateTime       @default(now())
+	updatedAt    DateTime       @updatedAt
+
+	shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Restrict)
+	courier  Courier  @relation(fields: [courierId], references: [id], onDelete: Restrict)
+
+	@@index([courierId])
+	@@index([status])
+	@@map("deliveries")
+}
+
+model TrackingEvent {
+	id          String         @id @default(uuid(7))
+	shipmentId  String
+	deliveryId  String?
+	status      ShipmentStatus
+	location    String?
+	description String?
+	createdAt   DateTime       @default(now())
+
+	shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+	@@index([shipmentId])
+	@@index([createdAt])
+	@@map("trackingEvents")
+}

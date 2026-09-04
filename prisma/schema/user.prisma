@@ -1,0 +1,74 @@
+model User {
+	id                 String       @id @default(uuid())
+	name               String
+	email              String
+	password           String?
+	googleId           String?      @unique
+	authProvider       AuthProvider @default(CREDENTIAL)
+	emailVerified      Boolean      @default(false)
+	role               Role         @default(CUSTOMER)
+	status             UserStatus   @default(ACTIVE)
+	needPasswordChange Boolean      @default(false)
+	imageUrl           String       @default("")
+	imagePublicId      String       @default("")
+	isDeleted          Boolean      @default(false)
+	deletedAt          DateTime?
+	createdAt          DateTime     @default(now())
+	updatedAt          DateTime     @updatedAt
+
+	customer Customer?
+	courier  Courier?
+
+	@@unique([email])
+	@@index([role])
+	@@index([status])
+	@@index([isDeleted])
+	@@map("users")
+}
+
+model Customer {
+	id            String   @id @default(uuid(7))
+	userId        String   @unique
+	name          String
+	email         String   @unique
+	contactNumber String?
+	address       String?
+	city          String?
+	isDeleted     Boolean  @default(false)
+	deletedAt     DateTime?
+	createdAt     DateTime @default(now())
+	updatedAt     DateTime @updatedAt
+
+	user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+	shipments Shipment[]
+
+	@@index([email])
+	@@index([city])
+	@@index([isDeleted])
+	@@map("customers")
+}
+
+model Courier {
+	id            String   @id @default(uuid(7))
+	userId        String   @unique
+	name          String
+	email         String   @unique
+	contactNumber String?
+	vehicleType   String
+	vehicleNumber String
+	availability  Boolean  @default(true)
+	currentCity   String?
+	isDeleted     Boolean  @default(false)
+	deletedAt     DateTime?
+	createdAt     DateTime @default(now())
+	updatedAt     DateTime @updatedAt
+
+	user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+	deliveries Delivery[]
+
+	@@index([email])
+	@@index([availability])
+	@@index([currentCity])
+	@@index([isDeleted])
+	@@map("couriers")
+}

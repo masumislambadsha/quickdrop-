@@ -1,0 +1,59 @@
+enum Role {
+	CUSTOMER
+	COURIER
+	ADMIN
+}
+
+enum UserStatus {
+	ACTIVE
+	BLOCKED
+	DELETED
+}
+
+enum AuthProvider {
+	GOOGLE
+	CREDENTIAL
+}
+
+enum ShipmentStatus {
+	REQUESTED
+	PICKED_UP
+	IN_TRANSIT
+	OUT_FOR_DELIVERY
+	DELIVERED
+	FAILED
+	CANCELLED
+}
+
+enum PaymentStatus {
+	UNPAID
+	PENDING
+	PAID
+	FAILED
+	CANCELLED
+	REFUNDED
+}
+
+enum DeliveryStatus {
+	ASSIGNED
+	PICKED_UP
+	IN_TRANSIT
+	OUT_FOR_DELIVERY
+	DELIVERED
+	FAILED
+	RETURNED
+}
+
+enum PricingTier {
+	STANDARD
+	EXPRESS
+	SAME_DAY
+}
+
+enum PackageType {
+	DOCUMENT
+	PARCEL
+	FRAGILE
+	PERISHABLE
+	HEAVY
+}
