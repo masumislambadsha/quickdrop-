@@ -127,7 +127,7 @@
 					}
 				},
 				{
-					"name": "Google Login",
+					"name": "Google Login (Authorization Code)",
 					"request": {
 						"method": "POST",
 						"header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -136,6 +136,21 @@
 							"raw": "{\n    \"code\": \"AUTHORIZATION_CODE_FROM_GOOGLE\",\n    \"redirectUri\": \"http://localhost:5000/api/v1/auth/google/callback\"\n}",
 							"options": { "raw": { "language": "json" } }
 						},
+						"description": "Requires http://localhost:5000/api/v1/auth/google/callback to be added to the GCP OAuth client's Authorized redirect URIs (otherwise Google returns redirect_uri_mismatch).",
+						"url": { "raw": "{{baseUrl}}/api/v1/auth/google/login", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "google", "login"] }
+					}
+				},
+				{
+					"name": "Google Login (ID Token)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"idToken\": \"PASTE_GOOGLE_ID_TOKEN_HERE\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"description": "Works without any GCP redirect URI configuration. Paste a real Google ID token (starts with eyJ...). Get one from a Google sign-in flow. The backend verifies it via google-auth-library.",
 						"url": { "raw": "{{baseUrl}}/api/v1/auth/google/login", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "google", "login"] }
 					}
 				},
