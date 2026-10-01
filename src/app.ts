@@ -33,7 +33,7 @@ app.set("trust proxy", 1);
 app.use(helmet());
 app.use(
 	cors({
-		origin: [config.app.frontendUrl, config.app.backendUrl],
+		origin: config.app.corsOrigins,
 		credentials: true,
 	}),
 );
