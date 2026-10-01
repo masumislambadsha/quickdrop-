@@ -20,10 +20,6 @@ export function globalErrorHandler(error: unknown, _req: Request, res: Response,
 			field: issue.path.join("."),
 			message: issue.message,
 		}));
-	} else if (error instanceof Error && "statusCode" in error) {
-		statusCode = (error as { statusCode: number }).statusCode;
-		message = error.message;
-		errors = (error as { errors?: unknown[] | null }).errors ?? null;
 	} else if (error instanceof Prisma.PrismaClientKnownRequestError) {
 		if (error.code === "P2002") {
 			statusCode = httpStatus.CONFLICT;
@@ -40,6 +36,15 @@ export function globalErrorHandler(error: unknown, _req: Request, res: Response,
 			message = error.message;
 		}
 	} else if (error instanceof Error) {
+		// Only trust a numeric statusCode (AppError sets one). Third-party errors
+		// like Stripe's StripeInvalidRequestError also carry `statusCode`, but it
+		// can be undefined — trusting that would call res.status(undefined) and
+		// mask the real failure behind a 500.
+		const maybeStatusCode = (error as { statusCode?: unknown }).statusCode;
+		if (typeof maybeStatusCode === "number") {
+			statusCode = maybeStatusCode;
+			errors = (error as { errors?: unknown[] | null }).errors ?? null;
+		}
 		message = error.message;
 	}
 

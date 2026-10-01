@@ -2,12 +2,22 @@ import "dotenv/config";
 
 import httpStatus from "http-status";
 
+/**
+ * Vercel/other hosts may expose FRONTEND_URL with trailing slashes, whitespace,
+ * or an empty string. Stripe rejects non-absolute redirect URLs ("Not a valid
+ * URL"), so normalise once here instead of trusting the raw env value.
+ */
+function normalizeUrl(value: string | undefined, fallback: string): string {
+	const trimmed = (value ?? "").trim().replace(/\/+$/, "");
+	return trimmed.length > 0 ? trimmed : fallback;
+}
+
 const config = {
 	app: {
 		env: process.env.NODE_ENV ?? "development",
 		port: Number(process.env.PORT ?? 5000),
-		backendUrl: process.env.BACKEND_URL ?? "http://localhost:5000",
-		frontendUrl: process.env.FRONTEND_URL ?? "http://localhost:3000",
+		backendUrl: normalizeUrl(process.env.BACKEND_URL, "http://localhost:5000"),
+		frontendUrl: normalizeUrl(process.env.FRONTEND_URL, "http://localhost:3000"),
 	},
 	db: {
 		url: process.env.DATABASE_URL ?? "",
