@@ -1,15 +1,10 @@
 {
     "version": 2,
     "buildCommand": "npm run build:vercel",
-    "functions": {
-        "dist/server.mjs": {
-            "runtime": "@vercel/node@3"
-        }
-    },
     "rewrites": [
         {
             "source": "/(.*)",
-            "destination": "/dist/server.mjs"
+            "destination": "/api/index"
         }
     ]
 }
