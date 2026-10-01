@@ -486,8 +486,12 @@ async function main(): Promise<void> {
 				amount: shipment.cost,
 				currency: "usd",
 				status,
-				stripeSessionId: `cs_test_demo_${paymentCreated}`,
-				stripeSessionUrl: `https://checkout.stripe.com/c/pay/cs_test_demo_${paymentCreated}`,
+				// Seeded payments never have a real checkout session, so leave
+				// the session fields null for every status. The backend mints a
+				// genuine session on the customer's first click; a fabricated
+				// URL (cs_test_demo_*) sends them to a "link is incomplete" page.
+				stripeSessionId: null,
+				stripeSessionUrl: null,
 				stripePaymentIntentId:
 					status === "PAID" ? `pi_test_demo_${paymentCreated}` : null,
 				paidAt: status === "PAID" ? daysAgo(6 - (paymentCreated % 5)) : null,

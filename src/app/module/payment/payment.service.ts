@@ -20,6 +20,23 @@ function getStripe(): Stripe | null {
 	return new Stripe(config.stripe.secretKey);
 }
 
+/**
+ * A stored checkout session can only be handed back to the customer if it
+ * still exists in Stripe and is still open. Seeded/demo rows carry fabricated
+ * ids (e.g. `cs_test_demo_36`) and abandoned checkouts expire after 24h —
+ * both would send the customer to a broken "link is incomplete" page.
+ */
+async function isSessionUsable(stripe: Stripe, sessionId: string | null): Promise<boolean> {
+	if (!sessionId) return false;
+
+	try {
+		const session = await stripe.checkout.sessions.retrieve(sessionId);
+		return session.status === "open";
+	} catch {
+		return false;
+	}
+}
+
 async function initiatePayment(customerUserId: string, shipmentId: string) {
 	const shipment = await prisma.shipment.findFirst({
 		where: {
@@ -45,18 +62,18 @@ async function initiatePayment(customerUserId: string, shipmentId: string) {
 		throw new AppError(httpStatus.FORBIDDEN, "You can only pay for your own shipments.");
 	}
 
-	const existingPending = await prisma.payment.findFirst({
+	const existing = await prisma.payment.findFirst({
 		where: {
 			shipmentId,
 			status: { in: ["PENDING", "PAID"] },
 		},
 	});
 
-	if (existingPending) {
+	if (existing?.status === "PAID") {
 		return {
-			paymentId: existingPending.id,
-			stripeSessionUrl: existingPending.stripeSessionUrl,
-			status: existingPending.status,
+			paymentId: existing.id,
+			stripeSessionUrl: existing.stripeSessionUrl,
+			status: existing.status,
 			message: "Payment already processed for this shipment.",
 		};
 	}
@@ -73,6 +90,18 @@ async function initiatePayment(customerUserId: string, shipmentId: string) {
 		);
 	}
 
+	// Reuse an in-flight session so a double-click or a refresh doesn't create
+	// duplicates, but never hand back a session that Stripe will reject.
+	if (existing && (await isSessionUsable(stripe, existing.stripeSessionId))) {
+		return {
+			paymentId: existing.id,
+			stripeSessionUrl: existing.stripeSessionUrl,
+			stripeSessionId: existing.stripeSessionId,
+			status: existing.status,
+			message: "Resuming your existing payment.",
+		};
+	}
+
 	const amountInCents = Math.round(shipment.cost * 100);
 	const trackingLabel = `QuickDrop Shipment ${shipment.trackingNumber}`;
 
@@ -82,7 +111,7 @@ async function initiatePayment(customerUserId: string, shipmentId: string) {
 		line_items: [
 			{
 				price_data: {
-					currency: "usd",
+					currency: config.stripe.currency,
 					product_data: { name: trackingLabel },
 					unit_amount: amountInCents,
 				},
@@ -97,19 +126,31 @@ async function initiatePayment(customerUserId: string, shipmentId: string) {
 		},
 	});
 
-	const paymentId = globalThis.crypto.randomUUID().replace(/-/g, "").slice(0, 16);
-
-	const payment = await prisma.payment.create({
-		data: {
-			id: paymentId,
-			shipmentId,
-			amount: shipment.cost,
-			currency: "usd",
-			stripeSessionId: session.id,
-			stripeSessionUrl: session.url,
-			status: "PENDING",
-		},
-	});
+	// Reuse the stale row (if any) rather than accumulating one dead payment
+	// record per attempt; the webhook matches on shipmentId.
+	const payment = existing
+		? await prisma.payment.update({
+				where: { id: existing.id },
+				data: {
+					status: "PENDING",
+					stripeSessionId: session.id,
+					stripeSessionUrl: session.url,
+					stripePaymentIntentId: null,
+					receiptUrl: null,
+					paidAt: null,
+				},
+			})
+		: await prisma.payment.create({
+				data: {
+					id: globalThis.crypto.randomUUID().replace(/-/g, "").slice(0, 16),
+					shipmentId,
+					amount: shipment.cost,
+					currency: config.stripe.currency,
+					stripeSessionId: session.id,
+					stripeSessionUrl: session.url,
+					status: "PENDING",
+				},
+			});
 
 	await prisma.$transaction([
 		prisma.shipment.update({
