@@ -153,6 +153,20 @@ async function getMyShipments(userId: string, query: IMyShipmentsQuery) {
 			orderBy: { createdAt: "desc" },
 			include: {
 				delivery: { select: { id: true, status: true, courier: { select: { name: true, contactNumber: true } } } },
+				// The customer payments page builds its rows from the customer's own
+				// shipments, so this relation is required. Without it every payment
+				// page renders the empty state even when payments exist.
+				payments: {
+					orderBy: { createdAt: "desc" },
+					select: {
+						id: true,
+						amount: true,
+						status: true,
+						currency: true,
+						receiptUrl: true,
+						paidAt: true,
+					},
+				},
 			},
 		}),
 		prisma.shipment.count({ where }),
