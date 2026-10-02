@@ -1,0 +1,21 @@
+node_modules
+dist
+build
+.env
+.env.local
+.env.*.local
+src/generated
+*.log
+npm-debug.log*
+.DS_Store
+.idea
+.vscode
+*.swp
+.vercel
+.vercelignore
+
+# NOTE: api/ is deliberately NOT ignored here.
+# Vercel falls back to .gitignore when no .vercelignore exists, and the ignore
+# rules are applied to the post-build filesystem. Ignoring api/ therefore
+# stripped the built api/index.mjs out of Git-connected deployments, leaving
+# every route 404ing. The artifact stays in .gitignore so it is never committed.
