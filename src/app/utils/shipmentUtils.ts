@@ -86,9 +86,21 @@ function getNextDeliveryStatuses(current: string): string[] {
 	return DELIVERY_STATUS_TRANSITIONS[current] ?? [];
 }
 
+// Handover code the recipient shares with the courier at final delivery.
+// Deterministic from the tracking number so customer, admin, and the
+// confirm endpoint all agree without storing another secret.
+function deriveDeliveryCode(trackingNumber: string): string {
+	let sum = 0;
+	for (const ch of trackingNumber) {
+		sum += ch.charCodeAt(0);
+	}
+	return String((sum % 9000) + 1000);
+}
+
 export {
 	generateTrackingNumber,
 	formatToTk,
+	deriveDeliveryCode,
 	getNextStatuses,
 	getNextDeliveryStatuses,
 	STATUS_TRANSITIONS,

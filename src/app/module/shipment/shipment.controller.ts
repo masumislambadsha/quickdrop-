@@ -51,8 +51,8 @@ const searchShipments = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
-const getShipmentById = catchAsync(async (req: Request, res: Response) => {
-	const result = await ShipmentService.getShipmentById(req.params.id as string);
+const getShipmentById = catchAsync(async (req: AuthRequest, res: Response) => {
+	const result = await ShipmentService.getShipmentById(req.params.id as string, req.user);
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,

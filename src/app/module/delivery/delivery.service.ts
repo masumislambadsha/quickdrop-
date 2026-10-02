@@ -11,7 +11,7 @@ import {
 	parsePageParams,
 } from "../../utils/pagination.js";
 
-import { getNextDeliveryStatuses, getNextStatuses } from "../../utils/shipmentUtils.js";
+import { deriveDeliveryCode, getNextDeliveryStatuses, getNextStatuses } from "../../utils/shipmentUtils.js";
 
 import type {
 	IAssignCourierRequest,
@@ -382,14 +382,6 @@ async function confirmDelivery(
 	});
 
 	return { message: "Delivery confirmed. Shipment marked as DELIVERED." };
-}
-
-function deriveDeliveryCode(trackingNumber: string): string {
-	let sum = 0;
-	for (const ch of trackingNumber) {
-		sum += ch.charCodeAt(0);
-	}
-	return String((sum % 9000) + 1000);
 }
 
 async function getDeliveryById(deliveryId: string) {

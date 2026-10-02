@@ -13,6 +13,7 @@ import {
 
 import {
 	calculateShippingCost,
+	deriveDeliveryCode,
 	generateTrackingNumber,
 	getNextStatuses,
 } from "../../utils/shipmentUtils.js";
@@ -202,7 +203,7 @@ async function searchShipments(searchTerm: string) {
 	return shipments;
 }
 
-async function getShipmentById(shipmentId: string) {
+async function getShipmentById(shipmentId: string, user?: { id: string; role: string }) {
 	const shipment = await prisma.shipment.findFirst({
 		where: { id: shipmentId, isDeleted: false },
 		include: {
@@ -247,7 +248,23 @@ async function getShipmentById(shipmentId: string) {
 		throw new AppError(httpStatus.NOT_FOUND, "Shipment not found.");
 	}
 
-	return shipment;
+	// The handover code must reach the customer (who shares it with the
+	// courier) but never the courier (who could otherwise self-confirm).
+	// This endpoint serves all roles, so attach it only for the owner/admin.
+	let deliveryCode: string | undefined;
+	if (user?.role === "ADMIN") {
+		deliveryCode = deriveDeliveryCode(shipment.trackingNumber);
+	} else if (user?.role === "CUSTOMER") {
+		const customer = await prisma.customer.findUnique({
+			where: { userId: user.id },
+			select: { id: true },
+		});
+		if (customer && customer.id === shipment.customerId) {
+			deliveryCode = deriveDeliveryCode(shipment.trackingNumber);
+		}
+	}
+
+	return { ...shipment, deliveryCode };
 }
 
 async function getShipmentByTracking(trackingNumber: string) {
