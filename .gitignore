@@ -26,4 +26,8 @@ npm-debug.log*
 # vercel
 .vercel/
 .vercel
-api/
+
+# api/ holds the Vercel serverless bundle. It is intentionally NOT ignored
+# here: Vercel collects the post-build output through this ignore list, and
+# ignoring it stripped the function from Git-connected deployments. Local-only
+# exclusion lives in .git/info/exclude so the artifact is never committed.
