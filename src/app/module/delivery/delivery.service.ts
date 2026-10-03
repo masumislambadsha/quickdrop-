@@ -8,7 +8,9 @@ import { AppError } from "../../utils/AppError.js";
 
 import {
 	calculatePagination,
+	parseCursorParams,
 	parsePageParams,
+	toCursorPage,
 } from "../../utils/pagination.js";
 
 import { deriveDeliveryCode, getNextDeliveryStatuses, getNextStatuses } from "../../utils/shipmentUtils.js";
@@ -142,8 +144,6 @@ async function getMyDeliveries(courierUserId: string, query: IMyDeliveriesQuery)
 		throw new AppError(httpStatus.NOT_FOUND, "Courier profile not found.");
 	}
 
-	const { page, limit, skip } = parsePageParams(query.page, query.limit);
-
 	const where: Prisma.DeliveryWhereInput = {
 		courierId: courier.id,
 	};
@@ -151,6 +151,53 @@ async function getMyDeliveries(courierUserId: string, query: IMyDeliveriesQuery)
 	if (query.status) {
 		where.status = query.status as Prisma.EnumDeliveryStatusFilter;
 	}
+	if (
+		(typeof query.cursor === "string" && query.cursor.length > 0) ||
+		query.page === undefined
+	) {
+		const { limit, takePlusOne } = parseCursorParams(query.limit);
+
+		// Tolerate stale/deleted cursors: fall back to first page instead of 500.
+		// (Only hit the DB when a cursor was actually sent — findUnique with
+		// id: undefined throws.)
+		const cursorRow =
+			typeof query.cursor === "string" && query.cursor.length > 0
+				? await prisma.delivery.findUnique({
+						where: { id: query.cursor },
+						select: { id: true },
+					})
+				: null;
+
+		const [rows, total] = await prisma.$transaction([
+			prisma.delivery.findMany({
+				where,
+				...(cursorRow ? { cursor: { id: query.cursor }, skip: 1 } : {}),
+				take: takePlusOne,
+				orderBy: [{ assignedAt: "desc" }, { id: "desc" }],
+				include: {
+					shipment: {
+						select: {
+							id: true,
+							trackingNumber: true,
+							origin: true,
+							destination: true,
+							recipientName: true,
+							recipientPhone: true,
+							packageType: true,
+							weightKg: true,
+							status: true,
+						},
+					},
+				},
+			}),
+			prisma.delivery.count({ where }),
+		]);
+
+		return toCursorPage(rows, limit, total);
+	}
+
+	// ——— Legacy offset mode (?page=&limit=) ———
+	const { page, limit, skip } = parsePageParams(query.page, query.limit);
 
 	const [deliveries, total] = await prisma.$transaction([
 		prisma.delivery.findMany({

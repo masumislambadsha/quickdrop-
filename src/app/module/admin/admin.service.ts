@@ -7,7 +7,7 @@ import { prisma } from "../../lib/prisma.js";
 
 import { AppError } from "../../utils/AppError.js";
 
-import { calculatePagination, parsePageParams } from "../../utils/pagination.js";
+import { calculatePagination, parseCursorParams, parsePageParams, toCursorPage } from "../../utils/pagination.js";
 
 import type { IAuditLogsQuery } from "./admin.interface.js";
 
@@ -70,8 +70,6 @@ async function getDashboardStats() {
 }
 
 async function getAuditLogs(query: IAuditLogsQuery) {
-	const { page, limit, skip } = parsePageParams(query.page, query.limit);
-
 	const where: Prisma.AuditLogWhereInput = {};
 
 	if (query.actorId) {
@@ -81,6 +79,37 @@ async function getAuditLogs(query: IAuditLogsQuery) {
 	if (query.action) {
 		where.action = query.action;
 	}
+
+	// ——— Cursor-based (infinite scroll / Load More) ———
+	if (
+		(typeof query.cursor === "string" && query.cursor.length > 0) ||
+		query.page === undefined
+	) {
+		const { limit, takePlusOne } = parseCursorParams(query.limit);
+
+		const cursorRow =
+			typeof query.cursor === "string" && query.cursor.length > 0
+				? await prisma.auditLog.findUnique({
+						where: { id: query.cursor },
+						select: { id: true },
+					})
+				: null;
+
+		const [rows, total] = await prisma.$transaction([
+			prisma.auditLog.findMany({
+				where,
+				...(cursorRow ? { cursor: { id: query.cursor }, skip: 1 } : {}),
+				take: takePlusOne,
+				orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+			}),
+			prisma.auditLog.count({ where }),
+		]);
+
+		return toCursorPage(rows, limit, total);
+	}
+
+	// ——— Legacy offset mode (?page=&limit=) ———
+	const { page, limit, skip } = parsePageParams(query.page, query.limit);
 
 	const [logs, total] = await prisma.$transaction([
 		prisma.auditLog.findMany({

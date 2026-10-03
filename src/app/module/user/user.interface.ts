@@ -10,4 +10,5 @@ export interface IGetUsersFaqQuery {
 	limit?: number;
 	search?: string;
 	role?: string;
+	cursor?: string;
 }

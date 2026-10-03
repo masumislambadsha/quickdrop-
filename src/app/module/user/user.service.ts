@@ -5,7 +5,7 @@ import { prisma } from "../../lib/prisma.js";
 
 import { AppError } from "../../utils/AppError.js";
 
-import { calculatePagination, parsePageParams } from "../../utils/pagination.js";
+import { calculatePagination, parseCursorParams, parsePageParams, toCursorPage } from "../../utils/pagination.js";
 
 import type { IGetUsersFaqQuery, IUpdateMeRequest } from "./user.interface.js";
 
@@ -112,7 +112,6 @@ async function updateUserProfile(userId: string, payload: IUpdateMeRequest) {
 }
 
 async function getUsers(query: IGetUsersFaqQuery) {
-	const { page, limit, skip } = parsePageParams(String(query.page), String(query.limit));
 	const { search, role } = query;
 
 	const searchableFields = ["name", "email"];
@@ -130,6 +129,54 @@ async function getUsers(query: IGetUsersFaqQuery) {
 			[field]: { contains: search, mode: "insensitive" },
 		}));
 	}
+
+	const userSelect = {
+		id: true,
+		name: true,
+		email: true,
+		role: true,
+		status: true,
+		authProvider: true,
+		createdAt: true,
+		customer: {
+			select: { contactNumber: true, city: true },
+		},
+		courier: {
+			select: { contactNumber: true, vehicleType: true, availability: true },
+		},
+	} as const;
+
+	// ——— Cursor-based (infinite scroll / Load More) ———
+	if (
+		(typeof query.cursor === "string" && query.cursor.length > 0) ||
+		query.page === undefined
+	) {
+		const { limit, takePlusOne } = parseCursorParams(String(query.limit));
+
+		const cursorRow =
+			typeof query.cursor === "string" && query.cursor.length > 0
+				? await prisma.user.findUnique({
+						where: { id: query.cursor },
+						select: { id: true },
+					})
+				: null;
+
+		const [rows, total] = await prisma.$transaction([
+			prisma.user.findMany({
+				where,
+				...(cursorRow ? { cursor: { id: query.cursor }, skip: 1 } : {}),
+				take: takePlusOne,
+				orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+				select: userSelect,
+			}),
+			prisma.user.count({ where }),
+		]);
+
+		return toCursorPage(rows, limit, total);
+	}
+
+	// ——— Legacy offset mode (?page=&limit=) ———
+	const { page, limit, skip } = parsePageParams(String(query.page), String(query.limit));
 
 	const [users, total] = await prisma.$transaction([
 		prisma.user.findMany({

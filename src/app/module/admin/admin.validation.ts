@@ -24,5 +24,6 @@ export const getAuditLogsQuerySchema = z.object({
 		limit: z.coerce.number().int().min(1).max(100).optional(),
 		actorId: z.string().min(1).optional(),
 		action: z.string().min(1).optional(),
+		cursor: z.string().min(1).optional(),
 	}),
 });

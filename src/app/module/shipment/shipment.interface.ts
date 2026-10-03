@@ -29,6 +29,8 @@ export interface IListShipmentsQuery {
 	limit?: string;
 	search?: string;
 	status?: string;
+	cursor?: string;
+	hasDelivery?: string;
 }
 
 export interface IMyShipmentsQuery {
@@ -36,4 +38,5 @@ export interface IMyShipmentsQuery {
 	limit?: string;
 	search?: string;
 	status?: string;
+	cursor?: string;
 }

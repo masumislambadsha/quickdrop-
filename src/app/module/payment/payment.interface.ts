@@ -8,4 +8,5 @@ export interface IPaymentQuery {
 	page?: string;
 	limit?: string;
 	status?: string;
+	cursor?: string;
 }

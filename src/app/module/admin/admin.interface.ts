@@ -19,4 +19,5 @@ export interface IAuditLogsQuery {
 	limit?: string;
 	actorId?: string;
 	action?: string;
+	cursor?: string;
 }

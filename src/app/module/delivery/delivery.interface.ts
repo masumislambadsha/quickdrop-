@@ -15,4 +15,5 @@ export interface IMyDeliveriesQuery {
 	page?: string;
 	limit?: string;
 	status?: string;
+	cursor?: string;
 }

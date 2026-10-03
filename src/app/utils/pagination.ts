@@ -56,4 +56,30 @@ function parsePageParams(pageStr?: string, limitStr?: string): { page: number; l
 	return { page, limit, skip: (page - 1) * limit };
 }
 
-export { buildWhere, calculatePagination, parsePageParams };
+interface CursorPaginationResult {
+	total: number;
+	limit: number;
+	nextCursor: string | null;
+	hasMore: boolean;
+}
+
+function parseCursorParams(limitStr?: string): { limit: number; takePlusOne: number } {
+	const limit = Math.min(100, Math.max(1, Number(limitStr) || 10));
+	return { limit, takePlusOne: limit + 1 };
+}
+
+function toCursorPage<T extends { id: string }>(rows: T[], limit: number, total: number) {
+	const hasMore = rows.length > limit;
+	const data = hasMore ? rows.slice(0, limit) : rows;
+	return {
+		data,
+		meta: {
+			total,
+			limit,
+			nextCursor: hasMore ? data[data.length - 1].id : null,
+			hasMore,
+		} satisfies CursorPaginationResult,
+	};
+}
+
+export { buildWhere, calculatePagination, parsePageParams, parseCursorParams, toCursorPage };

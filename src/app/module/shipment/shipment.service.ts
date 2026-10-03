@@ -8,7 +8,9 @@ import { AppError } from "../../utils/AppError.js";
 import {
 	buildWhere,
 	calculatePagination,
+	parseCursorParams,
 	parsePageParams,
+	toCursorPage,
 } from "../../utils/pagination.js";
 
 import {
@@ -98,13 +100,57 @@ async function createShipment(userId: string, payload: ICreateShipmentRequest) {
 }
 
 async function getShipments(query: IListShipmentsQuery) {
-	const { page, limit, skip } = parsePageParams(query.page, query.limit);
-
 	const where = buildWhere({
 		search: query.search,
 		searchFields: ["trackingNumber", "recipientName", "destination", "origin"],
 		status: query.status,
 	});
+
+	// Deliveries view: only shipments that have a courier assigned.
+	if (query.hasDelivery === "true") {
+		where.delivery = { isNot: null };
+	}
+
+	// ——— Cursor-based (infinite scroll / Load More) ———
+	// Triggered when ?cursor= is present OR ?page= is omitted (infinite client
+	// sends only limit+filters for the first chunk). Stable order:
+	// createdAt desc, id desc.
+	if (
+		(typeof query.cursor === "string" && query.cursor.length > 0) ||
+		query.page === undefined
+	) {
+		const { limit, takePlusOne } = parseCursorParams(query.limit);
+
+		// Tolerate stale/deleted cursors: fall back to first page instead of 500.
+		// (Only hit the DB when a cursor was actually sent — findUnique with
+		// id: undefined throws.)
+		const cursorRow =
+			typeof query.cursor === "string" && query.cursor.length > 0
+				? await prisma.shipment.findUnique({
+						where: { id: query.cursor },
+						select: { id: true },
+					})
+				: null;
+
+		const [rows, total] = await prisma.$transaction([
+			prisma.shipment.findMany({
+				where,
+				...(cursorRow ? { cursor: { id: query.cursor }, skip: 1 } : {}),
+				take: takePlusOne,
+				orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+				include: {
+					customer: { select: { name: true, email: true } },
+					delivery: { select: { id: true, courierId: true, status: true } },
+				},
+			}),
+			prisma.shipment.count({ where }),
+		]);
+
+		return toCursorPage(rows, limit, total);
+	}
+
+	// ——— Legacy offset mode (?page=&limit=) ———
+	const { page, limit, skip } = parsePageParams(query.page, query.limit);
 
 	const [shipments, total] = await prisma.$transaction([
 		prisma.shipment.findMany({
@@ -129,8 +175,6 @@ async function getShipments(query: IListShipmentsQuery) {
 async function getMyShipments(userId: string, query: IMyShipmentsQuery) {
 	const customerId = await getCustomerId(userId);
 
-	const { page, limit, skip } = parsePageParams(query.page, query.limit);
-
 	const where: Prisma.ShipmentWhereInput = {
 		customerId,
 		isDeleted: false,
@@ -145,6 +189,54 @@ async function getMyShipments(userId: string, query: IMyShipmentsQuery) {
 			[field]: { contains: query.search, mode: "insensitive" },
 		}));
 	}
+
+	// ——— Cursor-based (infinite scroll / Load More) ———
+	if (
+		(typeof query.cursor === "string" && query.cursor.length > 0) ||
+		query.page === undefined
+	) {
+		const { limit, takePlusOne } = parseCursorParams(query.limit);
+
+		const cursorRow =
+			typeof query.cursor === "string" && query.cursor.length > 0
+				? await prisma.shipment.findUnique({
+						where: { id: query.cursor },
+						select: { id: true },
+					})
+				: null;
+
+		const [rows, total] = await prisma.$transaction([
+			prisma.shipment.findMany({
+				where,
+				...(cursorRow ? { cursor: { id: query.cursor }, skip: 1 } : {}),
+				take: takePlusOne,
+				orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+				include: {
+					delivery: { select: { id: true, status: true, courier: { select: { name: true, contactNumber: true } } } },
+					// The customer payments page builds its rows from the customer's own
+					// shipments, so this relation is required. Without it every payment
+					// page renders the empty state even when payments exist.
+					payments: {
+						orderBy: { createdAt: "desc" },
+						select: {
+							id: true,
+							amount: true,
+							status: true,
+							currency: true,
+							receiptUrl: true,
+							paidAt: true,
+						},
+					},
+				},
+			}),
+			prisma.shipment.count({ where }),
+		]);
+
+		return toCursorPage(rows, limit, total);
+	}
+
+	// ——— Legacy offset mode (?page=&limit=) ———
+	const { page, limit, skip } = parsePageParams(query.page, query.limit);
 
 	const [shipments, total] = await prisma.$transaction([
 		prisma.shipment.findMany({

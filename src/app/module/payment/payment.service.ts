@@ -8,7 +8,7 @@ import { prisma } from "../../lib/prisma.js";
 
 import { AppError } from "../../utils/AppError.js";
 
-import { calculatePagination, parsePageParams } from "../../utils/pagination.js";
+import { calculatePagination, parseCursorParams, parsePageParams, toCursorPage } from "../../utils/pagination.js";
 
 import type { IPaymentQuery } from "./payment.interface.js";
 
@@ -231,13 +231,52 @@ async function getPaymentStatus(paymentId: string) {
 }
 
 async function getAllPayments(query: IPaymentQuery) {
-	const { page, limit, skip } = parsePageParams(query.page, query.limit);
-
 	const where: Prisma.PaymentWhereInput = {};
 
 	if (query.status) {
 		where.status = query.status as Prisma.EnumPaymentStatusFilter;
 	}
+
+	const paymentInclude = {
+		shipment: {
+			select: {
+				trackingNumber: true,
+				customer: { select: { name: true, email: true } },
+			},
+		},
+	} as const;
+
+	// ——— Cursor-based (infinite scroll / Load More) ———
+	if (
+		(typeof query.cursor === "string" && query.cursor.length > 0) ||
+		query.page === undefined
+	) {
+		const { limit, takePlusOne } = parseCursorParams(query.limit);
+
+		const cursorRow =
+			typeof query.cursor === "string" && query.cursor.length > 0
+				? await prisma.payment.findUnique({
+						where: { id: query.cursor },
+						select: { id: true },
+					})
+				: null;
+
+		const [rows, total] = await prisma.$transaction([
+			prisma.payment.findMany({
+				where,
+				...(cursorRow ? { cursor: { id: query.cursor }, skip: 1 } : {}),
+				take: takePlusOne,
+				orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+				include: paymentInclude,
+			}),
+			prisma.payment.count({ where }),
+		]);
+
+		return toCursorPage(rows, limit, total);
+	}
+
+	// ——— Legacy offset mode (?page=&limit=) ———
+	const { page, limit, skip } = parsePageParams(query.page, query.limit);
 
 	const [payments, total] = await prisma.$transaction([
 		prisma.payment.findMany({

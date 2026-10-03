@@ -37,6 +37,8 @@ export const listShipmentsQuerySchema = z.object({
 		limit: z.coerce.number().int().min(1).max(100).optional(),
 		search: z.string().max(100).optional(),
 		status: z.enum(["REQUESTED", "PICKED_UP", "IN_TRANSIT", "OUT_FOR_DELIVERY", "DELIVERED", "FAILED", "CANCELLED"]).optional(),
+		cursor: z.string().min(1).optional(),
+		hasDelivery: z.enum(["true", "false"]).optional(),
 	}),
 });
 
